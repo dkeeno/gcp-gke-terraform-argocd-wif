@@ -1,0 +1,36 @@
+# Apply this AFTER ArgoCD is up and you've pointed a repo at it:
+#
+#   kubectl apply -f argocd/application.yaml
+#
+# This tells ArgoCD to track app/k8s/ in this repo and reconcile to the
+# cluster on every commit.
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-gke
+  namespace: argocd
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/your-username/gcp-gke-terraform-argocd-wif.git
+    targetRevision: main
+    path: app/k8s
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: hello-gke
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m

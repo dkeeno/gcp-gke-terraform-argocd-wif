@@ -1,0 +1,11 @@
+# Copy this to terraform.tfvars and edit.
+
+project_id          = "your-gcp-project-id"
+region              = "europe-west1"
+project_name        = "demo-gke"
+environment         = "dev"
+
+# WIF — restrict to your org's GitLab projects
+gitlab_url          = "https://gitlab.com"
+gitlab_namespace    = "my-org"
+gitlab_project_path = "my-org/my-repo"   # leave empty to allow whole namespace

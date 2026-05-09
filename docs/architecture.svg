@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 580" font-family="-apple-system, system-ui, sans-serif">
+  <defs>
+    <style>
+      .label { font-size: 12px; fill: #1a1a1a; }
+      .small { font-size: 10px; fill: #555; }
+      .title { font-size: 16px; fill: #1a1a1a; font-weight: 600; }
+      .gcp { fill: #f4f8ff; stroke: #4285f4; stroke-width: 2; }
+      .gke { fill: #faf5ff; stroke: #805ad5; stroke-width: 1.5; }
+      .iam { fill: #fff8e6; stroke: #d69e2e; stroke-width: 1.5; }
+      .gitlab { fill: #ffe5e5; stroke: #e53e3e; stroke-width: 1.5; }
+      .pod { fill: #fff; stroke: #2b6cb0; stroke-width: 1; }
+      .external { fill: #fafafa; stroke: #888; stroke-width: 1; }
+    </style>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a202c"/>
+    </marker>
+  </defs>
+
+  <text x="430" y="28" text-anchor="middle" class="title">GCP GKE + WIF + ArgoCD — Architecture</text>
+
+  <rect x="40" y="60" width="220" height="160" rx="6" class="gitlab"/>
+  <text x="150" y="80" text-anchor="middle" class="label" font-weight="600">GitLab CI</text>
+  <text x="55" y="100" class="small">1. Job runs in pipeline</text>
+  <text x="55" y="118" class="small">2. GitLab issues short-lived</text>
+  <text x="55" y="132" class="small">   OIDC token (id_token)</text>
+  <text x="55" y="152" class="small">3. CI calls GCP STS, presents</text>
+  <text x="55" y="166" class="small">   id_token + provider URI</text>
+  <text x="55" y="186" class="small">→ NO service-account JSON</text>
+  <text x="55" y="200" class="small">  key in CI variables.</text>
+
+  <rect x="320" y="60" width="500" height="500" rx="8" class="gcp"/>
+  <text x="335" y="80" class="label" font-weight="600">GCP Project</text>
+
+  <rect x="345" y="100" width="220" height="120" rx="6" class="iam"/>
+  <text x="455" y="120" text-anchor="middle" class="label" font-weight="600">Workload Identity Federation</text>
+  <text x="360" y="140" class="small">Pool: gitlab-pool</text>
+  <text x="360" y="155" class="small">Provider: gitlab-provider</text>
+  <text x="360" y="170" class="small">  issuer = https://gitlab.com</text>
+  <text x="360" y="190" class="small">attribute_condition:</text>
+  <text x="360" y="205" class="small">  namespace == "my-org"</text>
+
+  <rect x="595" y="100" width="210" height="120" rx="6" class="iam"/>
+  <text x="700" y="120" text-anchor="middle" class="label" font-weight="600">Service Accounts</text>
+  <text x="610" y="140" class="small">• gitlab-ci SA (impersonated</text>
+  <text x="610" y="155" class="small">  by WIF — no keys)</text>
+  <text x="610" y="172" class="small">• node SA (least-privilege)</text>
+  <text x="610" y="195" class="small">Bindings via principalSet://</text>
+
+  <rect x="345" y="240" width="460" height="290" rx="6" class="gke"/>
+  <text x="575" y="260" text-anchor="middle" class="label" font-weight="600">Private Regional GKE Cluster</text>
+  <text x="360" y="278" class="small">k8s 1.30 · 3 zones · nodes have NO public IP · Cloud NAT for egress</text>
+
+  <rect x="365" y="295" width="200" height="100" rx="4" fill="white" stroke="#805ad5"/>
+  <text x="465" y="313" text-anchor="middle" class="label" font-weight="600">argocd namespace</text>
+  <text x="380" y="332" class="small">argocd-server</text>
+  <text x="380" y="346" class="small">argocd-controller</text>
+  <text x="380" y="360" class="small">argocd-repo-server</text>
+  <text x="380" y="380" class="small">Watches GitOps repo →</text>
+
+  <rect x="585" y="295" width="200" height="100" rx="4" class="pod"/>
+  <text x="685" y="313" text-anchor="middle" class="label" font-weight="600">hello-gke namespace</text>
+  <text x="600" y="332" class="small">Deployment (2 pods)</text>
+  <text x="600" y="346" class="small">Service: ClusterIP</text>
+  <text x="600" y="380" class="small">Reconciled by ArgoCD</text>
+
+  <rect x="365" y="415" width="420" height="100" rx="4" fill="white" stroke="#888"/>
+  <text x="575" y="435" text-anchor="middle" class="label" font-weight="600">Network</text>
+  <text x="380" y="453" class="small">Custom VPC + subnet (10.20.0.0/20)</text>
+  <text x="380" y="468" class="small">Pods range:    10.30.0.0/14</text>
+  <text x="380" y="483" class="small">Services range: 10.40.0.0/20</text>
+  <text x="380" y="498" class="small">Cloud Router + NAT for egress</text>
+
+  <line x1="260" y1="125" x2="345" y2="155" class="arrow" stroke="#1a202c" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <line x1="565" y1="160" x2="595" y2="160" class="arrow" stroke="#1a202c" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+  <line x1="700" y1="220" x2="700" y2="295" class="arrow" stroke="#1a202c" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+  <line x1="565" y1="345" x2="585" y2="345" class="arrow" stroke="#1a202c" stroke-width="1" fill="none" marker-end="url(#arr)"/>
+
+  <rect x="40" y="450" width="220" height="110" rx="6" class="external"/>
+  <text x="150" y="470" text-anchor="middle" class="label" font-weight="600">GitOps Repo (this repo)</text>
+  <text x="55" y="490" class="small">app/k8s/ — manifests</text>
+  <text x="55" y="505" class="small">argocd/application.yaml</text>
+  <text x="55" y="525" class="small">ArgoCD pulls + reconciles</text>
+  <text x="55" y="540" class="small">on every commit (auto-sync).</text>
+
+  <line x1="260" y1="495" x2="365" y2="345" class="arrow" stroke="#1a202c" stroke-width="1" fill="none" marker-end="url(#arr)" stroke-dasharray="4,3"/>
+</svg>
