@@ -1,0 +1,27 @@
+name: terraform
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+      - name: terraform fmt
+        run: terraform fmt -check -recursive
+      - name: terraform init -backend=false
+        run: terraform init -backend=false
+        working-directory: ${{ vars.TF_DIR || '.' }}
+      - name: terraform validate
+        run: terraform validate
+        working-directory: ${{ vars.TF_DIR || '.' }}
